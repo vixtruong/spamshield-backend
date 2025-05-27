@@ -1,4 +1,5 @@
-﻿using SpamShieldSystem.Models;
+﻿using SpamShieldSystem.DTOs;
+using SpamShieldSystem.Models;
 
 namespace SpamShieldSystem.Interfaces
 {
@@ -9,5 +10,7 @@ namespace SpamShieldSystem.Interfaces
         Task<string> ClassifyEmail(Email email);
         Task<List<Email>> ClassifyEmails(List<Email> emails);
         Task<IEnumerable<Email>> GetEmailsByLabel(string label);
+        Task<EmailDetailDto> GetEmailDetail(int emailId);
+        Task<List<EmailDetailDto>> GetClassifiedEmailsDto(List<Email> emails);
     }
 }

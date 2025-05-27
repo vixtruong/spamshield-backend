@@ -18,4 +18,6 @@ public partial class Email
     public DateTime EmailDate { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    public virtual ICollection<EmailExplanation> EmailExplanations { get; set; } = new List<EmailExplanation>();
 }

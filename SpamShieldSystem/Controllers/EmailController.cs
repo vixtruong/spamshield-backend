@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SpamShieldSystem.Interfaces;
 using SpamShieldSystem.Models;
-using SpamShieldSystem.Services;
+using SpamShieldSystem.DTOs;
+using System.Text.Json;
 
 namespace SpamShieldSystem.Controllers
 {
@@ -20,8 +21,20 @@ namespace SpamShieldSystem.Controllers
         public async Task<IActionResult> GetAllEmails()
         {
             var emails = await _emailService.GetAllEmails();
-
             return Ok(emails);
+        }
+
+        [HttpGet("{emailId}")]
+        public async Task<IActionResult> GetEmailDetail(int emailId)
+        {
+            var emailDto = await _emailService.GetEmailDetail(emailId);
+
+            if (emailDto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(emailDto);
         }
 
         [HttpPost("classify-list")]
@@ -34,22 +47,21 @@ namespace SpamShieldSystem.Controllers
 
             try
             {
-                // Phân loại tất cả email
-                var classifiedEmails = await _emailService.ClassifyEmails(emails);
-
-                // Lọc email theo nhãn nếu có filterLabel
-                IEnumerable<Email> filteredEmails = classifiedEmails;
+                var classifiedEmailsDto = await _emailService.GetClassifiedEmailsDto(emails);
+                IEnumerable<EmailDetailDto> filteredEmails = classifiedEmailsDto;
                 if (!string.IsNullOrEmpty(filterLabel))
                 {
-                    filteredEmails = classifiedEmails.Where(e => e.Label == filterLabel).ToList();
+                    filteredEmails = classifiedEmailsDto.Where(e => e.Label == filterLabel).ToList();
                 }
 
-                return Ok(new
+                var response = new ClassifiedEmailResponseDto
                 {
-                    ClassifiedEmails = filteredEmails,
-                    TotalCount = classifiedEmails.Count,
+                    ClassifiedEmails = filteredEmails.ToList(),
+                    TotalCount = classifiedEmailsDto.Count,
                     FilteredCount = filteredEmails.Count()
-                });
+                };
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
